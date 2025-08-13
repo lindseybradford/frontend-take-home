@@ -1,7 +1,7 @@
 // hooks/useUsers.ts
-import { useState, useEffect, useCallback } from "react";
-import { apiClient } from "../api/client";
-import type { User } from "@server/models";
+import { useState, useEffect, useCallback } from 'react';
+import { apiClient } from '../api/client';
+import type { User } from '@server/models';
 
 interface UseUsersState {
   data: User[];
@@ -17,23 +17,23 @@ export function useUsers() {
   });
 
   const fetchUsers = useCallback(async (search?: string, page?: number) => {
-    setState((prev) => ({ ...prev, loading: true, error: null }));
+    setState(prev => ({ ...prev, loading: true, error: null }));
 
     try {
       const response = await apiClient.getUsers({ search, page });
-      setState((prev) => ({
+      setState(prev => ({
         ...prev,
         data: response.data,
         pages: response.pages,
         currentPage: page || 1,
-        searchQuery: search || "",
+        searchQuery: search || '',
         loading: false,
       }));
     } catch (error) {
-      setState((prev) => ({
+      setState(prev => ({
         ...prev,
         loading: false,
-        error: error instanceof Error ? error.message : "An error occurred",
+        error: error instanceof Error ? error.message : 'An error occurred',
       }));
     }
   }, []);

@@ -1,4 +1,4 @@
-import { useUsers } from "./hooks/useUsers";
+import { useUsers } from './hooks/useUsers';
 
 function App() {
   const { data: users, loading, error } = useUsers();
@@ -10,7 +10,7 @@ function App() {
     <>
       <h1>Users</h1>
       <ul>
-        {users.map((user) => (
+        {users.map(user => (
           <li key={user.id}>
             {user.first} {user.last}
           </li>
