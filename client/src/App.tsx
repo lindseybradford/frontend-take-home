@@ -1,4 +1,5 @@
 import { useUsers } from './hooks/useUsers';
+import { Box, Container, Tabs, Text } from '@radix-ui/themes';
 
 function App() {
   const { data: users, loading, error } = useUsers();
@@ -8,14 +9,32 @@ function App() {
 
   return (
     <>
-      <h1>Users</h1>
-      <ul>
-        {users.map(user => (
-          <li key={user.id}>
-            {user.first} {user.last}
-          </li>
-        ))}
-      </ul>
+      <Container size="4">
+        <Tabs.Root defaultValue="users">
+          <Tabs.List>
+            <Tabs.Trigger value="users">Users</Tabs.Trigger>
+            <Tabs.Trigger value="roles">Roles</Tabs.Trigger>
+          </Tabs.List>
+
+          <Box pt="3">
+            <Tabs.Content value="users">
+              <ul>
+                {users.map(user => (
+                  <li key={user.id}>
+                    <Text size="2">
+                      {user.first} {user.last}
+                    </Text>
+                  </li>
+                ))}
+              </ul>
+            </Tabs.Content>
+
+            <Tabs.Content value="roles">
+              <Text size="2">Access and update your documents.</Text>
+            </Tabs.Content>
+          </Box>
+        </Tabs.Root>
+      </Container>
     </>
   );
 }
