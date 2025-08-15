@@ -26,7 +26,7 @@ export const apiClient = {
     if (params?.search) url.searchParams.set('search', params.search);
     if (params?.page) url.searchParams.set('page', params.page.toString());
 
-    return request<PagedData<User>>(USER_ENDPOINT);
+    return request<PagedData<User>>(url.pathname + url.search);
   },
 
   getRoles: (params?: { search?: string; page?: number }) => {
@@ -34,6 +34,6 @@ export const apiClient = {
     if (params?.search) url.searchParams.set('search', params.search);
     if (params?.page) url.searchParams.set('page', params.page.toString());
 
-    return request<PagedData<Role>>(ROLES_ENDPOINT);
+    return request<PagedData<Role>>(url.pathname + url.search);
   },
 };

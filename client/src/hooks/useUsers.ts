@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { apiClient } from '../api/client';
 import type { User, Role } from '@server/models';
 
@@ -58,12 +58,21 @@ export function useUsers() {
     }
   }, []);
 
+  const retry = useCallback(() => {
+    fetchUsersWithRoles(state.searchQuery, state.currentPage);
+  }, [fetchUsersWithRoles, state.searchQuery, state.currentPage]);
+
+  const hasInitiallyFetched = useRef(false);
+
   useEffect(() => {
-    fetchUsersWithRoles();
+    if (!hasInitiallyFetched.current) {
+      hasInitiallyFetched.current = true;
+      fetchUsersWithRoles();
+    }
   }, [fetchUsersWithRoles]);
 
   return {
     ...state,
-    refetch: fetchUsersWithRoles,
+    retry,
   };
 }
