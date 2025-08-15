@@ -1,4 +1,4 @@
-const cache = new Map<string, { data: any; timestamp: number }>();
+const cache = new Map<string, { data: unknown; timestamp: number }>();
 const CACHE_TTL = 5 * 60 * 1000;
 
 export function getFromCache<T>(key: string): T | null {
@@ -10,7 +10,7 @@ export function getFromCache<T>(key: string): T | null {
     return null;
   }
 
-  return cached.data;
+  return cached.data as T;
 }
 
 export function setCache<T>(key: string, data: T): void {

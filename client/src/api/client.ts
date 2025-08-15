@@ -44,7 +44,6 @@ export const apiClient = {
     });
 
     clearCache('users_');
-
     return result;
   },
 
@@ -61,6 +60,19 @@ export const apiClient = {
     const result = await request<PagedData<Role>>(url.toString().replace(API_BASE, ''));
 
     setCache(cacheKey, result);
+    return result;
+  },
+
+  updateRole: async (
+    roleId: string,
+    updates: Partial<Pick<Role, 'name' | 'description' | 'isDefault'>>
+  ) => {
+    const result = await request<Role>(`${ROLES_ENDPOINT}/${roleId}`, {
+      method: 'PATCH',
+      body: JSON.stringify(updates),
+    });
+
+    clearCache('roles');
     return result;
   },
 };

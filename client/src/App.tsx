@@ -1,9 +1,10 @@
 import { Box, Container, Tabs, Text } from '@radix-ui/themes';
 import { UsersTab } from './components/UsersTab';
+import { AppProvider } from './contexts/AppContext';
 
 function App() {
   return (
-    <>
+    <AppProvider>
       <Container size="4" py={{ initial: '4', lg: '8' }} px="4">
         <Tabs.Root defaultValue="users">
           <Tabs.List>
@@ -26,7 +27,7 @@ function App() {
           </Box>
         </Tabs.Root>
       </Container>
-    </>
+    </AppProvider>
   );
 }
 

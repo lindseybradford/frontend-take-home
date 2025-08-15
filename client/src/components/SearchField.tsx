@@ -1,23 +1,23 @@
-import { Flex, Button, TextField, Box } from '@radix-ui/themes';
+import { Box, Flex, Button, TextField } from '@radix-ui/themes';
 import { MagnifyingGlassIcon, PlusIcon, Cross2Icon } from '@radix-ui/react-icons';
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 
 interface SearchFieldProps {
-  loading?: boolean;
-  searchValue?: string;
-  placeholder?: string;
-  createButtonText?: string;
-  onSearch?: (query: string) => void;
-  onCreateNew?: () => void;
-  onClearSearch?: () => void;
+  loading: boolean;
+  searchValue: string;
+  placeholder: string;
+  createButtonText: string;
+  onSearch: (query: string) => void;
+  onCreateNew: () => void;
+  onClearSearch: () => void;
   debounceMs?: number;
 }
 
 export function SearchField({
-  loading = false,
-  searchValue = '',
-  placeholder = 'Search by name',
-  createButtonText = 'Add User',
+  loading,
+  searchValue,
+  placeholder,
+  createButtonText,
   onSearch,
   onCreateNew,
   onClearSearch,
@@ -25,9 +25,10 @@ export function SearchField({
 }: SearchFieldProps) {
   const [inputValue, setInputValue] = useState(searchValue);
 
+  // Debounced search
   useEffect(() => {
     const timeoutId = setTimeout(() => {
-      if (inputValue !== searchValue && onSearch) {
+      if (inputValue !== searchValue) {
         onSearch(inputValue);
       }
     }, debounceMs);
@@ -36,77 +37,51 @@ export function SearchField({
   }, [inputValue, searchValue, onSearch, debounceMs]);
 
   useEffect(() => {
-    if (searchValue !== inputValue) {
-      setInputValue(searchValue);
-    }
-  }, [searchValue]);
-
-  const handleInputChange = useCallback((value: string) => {
-    setInputValue(value);
-  }, []);
+    setInputValue(searchValue);
+  }, [inputValue, searchValue]);
 
   const handleKeyDown = useCallback(
-    (event: React.KeyboardEvent<HTMLInputElement>) => {
-      if (event.key === 'Enter') {
-        event.preventDefault();
-        if (onSearch) {
-          onSearch(inputValue);
-        }
-      } else if (event.key === 'Escape') {
-        event.preventDefault();
-        if (inputValue && onClearSearch) {
-          setInputValue('');
-          onClearSearch();
-        }
+    (e: React.KeyboardEvent) => {
+      if (e.key === 'Enter') {
+        onSearch(inputValue);
+      }
+      if (e.key === 'Escape') {
+        setInputValue('');
+        onClearSearch();
       }
     },
     [inputValue, onSearch, onClearSearch]
   );
 
-  const handleClearSearch = useCallback(() => {
+  const handleClear = useCallback(() => {
     setInputValue('');
-    if (onClearSearch) {
-      onClearSearch();
-    }
+    onClearSearch();
   }, [onClearSearch]);
-
-  const showClearButton = inputValue.length > 0;
 
   return (
     <Box mb="6" mt="4">
       <Flex gap="2">
         <TextField.Root
           placeholder={placeholder}
-          value={inputValue}
-          onChange={event => handleInputChange(event.target.value)}
-          onKeyDown={handleKeyDown}
           style={{ flexGrow: 1 }}
           disabled={loading}
+          value={inputValue}
+          onChange={e => setInputValue(e.target.value)}
+          onKeyDown={handleKeyDown}
         >
           <TextField.Slot>
             <MagnifyingGlassIcon height="16" width="16" />
           </TextField.Slot>
-          {showClearButton && (
+          {inputValue && (
             <TextField.Slot>
-              <Button
-                size="1"
-                variant="ghost"
-                onClick={handleClearSearch}
-                disabled={loading}
-                style={{ cursor: 'pointer', marginRight: 1 }}
-              >
+              <Button size="1" variant="ghost" onClick={handleClear} style={{ cursor: 'pointer' }}>
                 <Cross2Icon height="12" width="12" />
               </Button>
             </TextField.Slot>
           )}
         </TextField.Root>
 
-        <Button
-          onClick={onCreateNew}
-          loading={loading}
-          disabled={loading}
-          style={{ cursor: 'pointer' }}
-        >
+        <Button onClick={onCreateNew} loading={loading} style={{ cursor: 'pointer' }}>
           <PlusIcon height="16" width="16" /> {createButtonText}
         </Button>
       </Flex>
