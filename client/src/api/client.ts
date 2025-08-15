@@ -1,4 +1,5 @@
 import type { PagedData, User, Role } from '@server/models';
+import { getFromCache, setCache, clearCache } from './cache';
 
 const API_BASE = 'http://localhost:3002';
 const USER_ENDPOINT = '/users';
@@ -21,19 +22,35 @@ async function request<T>(endpoint: string, options?: RequestInit): Promise<T> {
 }
 
 export const apiClient = {
-  getUsers: (params?: { search?: string; page?: number }) => {
+  getUsers: async (params?: { search?: string; page?: number }) => {
+    const cacheKey = `users_${JSON.stringify(params || {})}`;
+
+    const cached = getFromCache<PagedData<User>>(cacheKey);
+    if (cached) return cached;
+
     const url = new URL(USER_ENDPOINT, API_BASE);
     if (params?.search) url.searchParams.set('search', params.search);
     if (params?.page) url.searchParams.set('page', params.page.toString());
 
-    return request<PagedData<User>>(url.pathname + url.search);
+    const result = await request<PagedData<User>>(url.toString().replace(API_BASE, ''));
+
+    setCache(cacheKey, result);
+    return result;
   },
 
-  getRoles: (params?: { search?: string; page?: number }) => {
+  getRoles: async (params?: { search?: string; page?: number }) => {
+    const cacheKey = `roles_${JSON.stringify(params || {})}`;
+
+    const cached = getFromCache<PagedData<Role>>(cacheKey);
+    if (cached) return cached;
+
     const url = new URL(ROLES_ENDPOINT, API_BASE);
     if (params?.search) url.searchParams.set('search', params.search);
     if (params?.page) url.searchParams.set('page', params.page.toString());
 
-    return request<PagedData<Role>>(url.pathname + url.search);
+    const result = await request<PagedData<Role>>(url.toString().replace(API_BASE, ''));
+
+    setCache(cacheKey, result);
+    return result;
   },
 };
