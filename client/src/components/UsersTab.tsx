@@ -7,7 +7,7 @@ export function UsersTab() {
   const { data: users, loading, error, retry } = useUsers();
 
   const handleCreateNew = () => {
-    // TO
+    // TODO: handleCreateNew
   };
 
   return (

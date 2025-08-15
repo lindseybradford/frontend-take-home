@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 
-const useSillyLoadingText = () => {
+export const useSillyLoadingText = () => {
   const loadingPhrases = [
     'Warming up the hamsters...',
     'Convincing electrons to cooperate...',
@@ -25,7 +25,7 @@ const useSillyLoadingText = () => {
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrentPhrase(prev => (prev + 1) % loadingPhrases.length);
-    }, 3000);
+    }, 1000);
 
     return () => clearInterval(interval);
   }, [loadingPhrases.length]);

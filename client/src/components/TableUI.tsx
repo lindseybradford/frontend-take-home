@@ -1,5 +1,5 @@
 import { ReactNode } from 'react';
-import useSillyLoadingText from 'src/util/sillyLoading';
+import useSillyLoadingText from '@src/util/sillyLoading';
 import { Button, Flex, Spinner, Text } from '@radix-ui/themes';
 import { ExclamationTriangleIcon, PersonIcon, PlusIcon, ReloadIcon } from '@radix-ui/react-icons';
 
@@ -7,15 +7,11 @@ interface TableUIProps<T = unknown> {
   children: ReactNode;
   loading: boolean;
   error: string | null;
-
   handleRetry?: () => void;
-
   createNewText?: string;
   createNewHandler?: () => void;
-
   statusHeading?: string;
   statusMessage?: string;
-
   data: T[];
 }
 
