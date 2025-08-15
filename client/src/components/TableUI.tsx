@@ -81,7 +81,7 @@ export function TableUI<T = unknown>({
           </Text>
         </Flex>
         {onCreateNew && (
-          <Button onClick={onCreateNew}>
+          <Button onClick={onCreateNew} style={{ cursor: 'pointer' }}>
             <Flex gap="2" align="center">
               <PlusIcon />
               {createNewText}
