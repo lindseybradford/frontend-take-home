@@ -1,9 +1,10 @@
 import { TableUI } from './TableUI';
-import { Avatar, Flex, Table, Text } from '@radix-ui/themes';
+import { Avatar, Button, DropdownMenu, Flex, Table, Text } from '@radix-ui/themes';
 import { SearchField } from '@src/components/SearchField';
 import { useUsers } from '../hooks/useUsers';
 import { formatDate } from '../util/formatDate';
 import { useState, useCallback } from 'react';
+import { DotsHorizontalIcon } from '@radix-ui/react-icons';
 
 export function UsersTab() {
   const {
@@ -57,12 +58,13 @@ export function UsersTab() {
             <Table.ColumnHeaderCell>User</Table.ColumnHeaderCell>
             <Table.ColumnHeaderCell>Role</Table.ColumnHeaderCell>
             <Table.ColumnHeaderCell>Joined</Table.ColumnHeaderCell>
+            <Table.ColumnHeaderCell></Table.ColumnHeaderCell>
           </Table.Row>
         </Table.Header>
 
         <Table.Body>
           {users.map(user => (
-            <Table.Row key={user.id}>
+            <Table.Row key={user.id} align="center">
               <Table.RowHeaderCell>
                 <Flex align="center" gap="2">
                   <Avatar
@@ -83,6 +85,25 @@ export function UsersTab() {
                   month: 'long',
                   day: '2-digit',
                 })}
+              </Table.Cell>
+              <Table.Cell>
+                <DropdownMenu.Root>
+                  <DropdownMenu.Trigger>
+                    <Button
+                      variant="ghost"
+                      size="3"
+                      color="gray"
+                      radius="full"
+                      style={{ paddingLeft: 6, paddingRight: 6, cursor: `pointer` }}
+                    >
+                      <DotsHorizontalIcon height="16" width="16" />
+                    </Button>
+                  </DropdownMenu.Trigger>
+                  <DropdownMenu.Content alignOffset={-80}>
+                    <DropdownMenu.Item style={{ cursor: `pointer` }}>Edit user</DropdownMenu.Item>
+                    <DropdownMenu.Item style={{ cursor: `pointer` }}>Delete user</DropdownMenu.Item>
+                  </DropdownMenu.Content>
+                </DropdownMenu.Root>
               </Table.Cell>
             </Table.Row>
           ))}
