@@ -38,6 +38,16 @@ export const apiClient = {
     return result;
   },
 
+  deleteUser: async (id: string) => {
+    const result = await request<User>(`${USER_ENDPOINT}/${id}`, {
+      method: 'DELETE',
+    });
+
+    clearCache('users_');
+
+    return result;
+  },
+
   getRoles: async (params?: { search?: string; page?: number }) => {
     const cacheKey = `roles_${JSON.stringify(params || {})}`;
 

@@ -1,5 +1,5 @@
 import { TableUI } from './TableUI';
-import { Avatar, Button, DropdownMenu, Flex, Table, Text } from '@radix-ui/themes';
+import { AlertDialog, Avatar, Button, DropdownMenu, Flex, Table, Text } from '@radix-ui/themes';
 import { SearchField } from '@src/components/SearchField';
 import { useUsers } from '../hooks/useUsers';
 import { formatDate } from '../util/formatDate';
@@ -15,9 +15,14 @@ export function UsersTab() {
     searchQuery,
     handleSearch,
     handleClearSearch,
+    handleDeleteUser,
   } = useUsers();
 
   const [createLoading, setCreateLoading] = useState(false);
+
+  // Note: needs improved - somewhat janky work-around to show the dialog programatically since using the
+  // default trigger approach closes the dropdown button and removes the dialog from the DOM
+  const [dialogOpen, setDialogOpen] = useState(false);
 
   const handleCreateNew = useCallback(async () => {
     setCreateLoading(true);
@@ -100,8 +105,47 @@ export function UsersTab() {
                     </Button>
                   </DropdownMenu.Trigger>
                   <DropdownMenu.Content alignOffset={-80}>
+                    {/* Notes: I see that API supports post to create but the README didn't require it (assuming it's a second step of the assessment and leaving as-is) */}
                     <DropdownMenu.Item style={{ cursor: `pointer` }}>Edit user</DropdownMenu.Item>
-                    <DropdownMenu.Item style={{ cursor: `pointer` }}>Delete user</DropdownMenu.Item>
+                    <AlertDialog.Root open={dialogOpen} onOpenChange={setDialogOpen}>
+                      <AlertDialog.Trigger>
+                        {/* Notes: This is related to the note above for improvement 
+                        // Currently the dropdown stays open after the dialog is closed and needs manually shut. New Radix user here :/ */}
+                        <DropdownMenu.Item
+                          style={{ cursor: `pointer` }}
+                          onClick={e => {
+                            e.preventDefault();
+                            setDialogOpen(true);
+                          }}
+                        >
+                          Delete user
+                        </DropdownMenu.Item>
+                      </AlertDialog.Trigger>
+                      <AlertDialog.Content maxWidth="450px">
+                        <AlertDialog.Title>Delete user</AlertDialog.Title>
+                        <AlertDialog.Description size="2">
+                          Are you sure? This will delete this user and all of their data.
+                        </AlertDialog.Description>
+
+                        <Flex gap="3" mt="4" justify="end">
+                          <AlertDialog.Cancel>
+                            <Button variant="soft" color="gray" style={{ cursor: `pointer` }}>
+                              Cancel
+                            </Button>
+                          </AlertDialog.Cancel>
+                          <AlertDialog.Action>
+                            <Button
+                              onClick={() => handleDeleteUser(user.id)}
+                              variant="solid"
+                              color="red"
+                              style={{ cursor: `pointer` }}
+                            >
+                              Delete user
+                            </Button>
+                          </AlertDialog.Action>
+                        </Flex>
+                      </AlertDialog.Content>
+                    </AlertDialog.Root>
                   </DropdownMenu.Content>
                 </DropdownMenu.Root>
               </Table.Cell>

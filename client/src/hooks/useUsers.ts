@@ -73,6 +73,22 @@ export function useUsers() {
     fetchUsersWithRoles('', 1);
   }, [fetchUsersWithRoles]);
 
+  const handleDeleteUser = useCallback(
+    async (userId: string) => {
+      try {
+        await apiClient.deleteUser(userId);
+        fetchUsersWithRoles(state.searchQuery, state.currentPage);
+      } catch (error) {
+        setState(prev => ({
+          ...prev,
+          error: error instanceof Error ? error.message : 'Failed to delete user',
+        }));
+        throw error;
+      }
+    },
+    [apiClient, fetchUsersWithRoles, state.searchQuery, state.currentPage]
+  );
+
   const hasInitiallyFetched = useRef(false);
 
   useEffect(() => {
@@ -87,5 +103,6 @@ export function useUsers() {
     retry,
     handleSearch,
     handleClearSearch,
+    handleDeleteUser,
   };
 }
