@@ -7,9 +7,9 @@ interface TableUIProps<T = unknown> {
   children: ReactNode;
   loading: boolean;
   error: string | null;
-  handleRetry?: () => void;
+  onRetry?: () => void;
   createNewText?: string;
-  createNewHandler?: () => void;
+  onCreateNew?: () => void;
   statusHeading?: string;
   statusMessage?: string;
   data: T[];
@@ -19,9 +19,9 @@ export function TableUI<T = unknown>({
   children,
   loading,
   error,
-  handleRetry,
+  onRetry,
   createNewText = 'Add item',
-  createNewHandler,
+  onCreateNew,
   statusHeading = '',
   statusMessage = '',
   data,
@@ -56,8 +56,8 @@ export function TableUI<T = unknown>({
             {statusMessage || 'Please try again and contact support if the issue persists.'}
           </Text>
         </Flex>
-        {handleRetry && (
-          <Button onClick={handleRetry}>
+        {onRetry && (
+          <Button onClick={onRetry} style={{ cursor: 'pointer' }}>
             <Flex gap="2" align="center">
               <ReloadIcon />
               Retry
@@ -80,8 +80,8 @@ export function TableUI<T = unknown>({
             {statusMessage || 'Add an item to get started.'}
           </Text>
         </Flex>
-        {createNewHandler && (
-          <Button onClick={createNewHandler}>
+        {onCreateNew && (
+          <Button onClick={onCreateNew}>
             <Flex gap="2" align="center">
               <PlusIcon />
               {createNewText}

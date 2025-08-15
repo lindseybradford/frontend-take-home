@@ -1,24 +1,56 @@
 import { TableUI } from './TableUI';
 import { Avatar, Flex, Table, Text } from '@radix-ui/themes';
+import { SearchField } from '@src/components/SearchField';
 import { useUsers } from '../hooks/useUsers';
 import { formatDate } from '../util/formatDate';
+import { useState, useCallback } from 'react';
 
 export function UsersTab() {
-  const { data: users, loading, error, retry } = useUsers();
+  const {
+    data: users,
+    loading,
+    error,
+    retry,
+    searchQuery,
+    handleSearch,
+    handleClearSearch,
+  } = useUsers();
 
-  const handleCreateNew = () => {
-    // TODO: handleCreateNew
-  };
+  const [createLoading, setCreateLoading] = useState(false);
+
+  const handleCreateNew = useCallback(async () => {
+    setCreateLoading(true);
+    try {
+      // TODO: add user logic
+    } catch (error) {
+      console.error('Failed to create user:', error);
+    } finally {
+      setCreateLoading(false);
+    }
+  }, []);
+
+  const isLoading = loading || createLoading;
 
   return (
     <TableUI
       loading={loading}
       error={error}
-      handleRetry={retry}
+      onRetry={retry}
       createNewText="Add user"
-      createNewHandler={handleCreateNew}
+      onCreateNew={handleCreateNew}
       data={users}
     >
+      <SearchField
+        loading={isLoading}
+        searchValue={searchQuery}
+        placeholder="Search users by name"
+        createButtonText="Add User"
+        onSearch={handleSearch}
+        onCreateNew={handleCreateNew}
+        onClearSearch={handleClearSearch}
+        debounceMs={300}
+      />
+
       <Table.Root variant="surface">
         <Table.Header>
           <Table.Row>

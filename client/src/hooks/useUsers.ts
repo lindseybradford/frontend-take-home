@@ -62,6 +62,17 @@ export function useUsers() {
     fetchUsersWithRoles(state.searchQuery, state.currentPage);
   }, [fetchUsersWithRoles, state.searchQuery, state.currentPage]);
 
+  const handleSearch = useCallback(
+    (query: string) => {
+      fetchUsersWithRoles(query, 1);
+    },
+    [fetchUsersWithRoles]
+  );
+
+  const handleClearSearch = useCallback(() => {
+    fetchUsersWithRoles('', 1);
+  }, [fetchUsersWithRoles]);
+
   const hasInitiallyFetched = useRef(false);
 
   useEffect(() => {
@@ -74,5 +85,7 @@ export function useUsers() {
   return {
     ...state,
     retry,
+    handleSearch,
+    handleClearSearch,
   };
 }
