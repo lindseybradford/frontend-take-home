@@ -1,4 +1,4 @@
-import { Flex, Button, TextField } from '@radix-ui/themes';
+import { Flex, Button, TextField, Box } from '@radix-ui/themes';
 import { MagnifyingGlassIcon, PlusIcon, Cross2Icon } from '@radix-ui/react-icons';
 import { useState, useCallback, useEffect } from 'react';
 
@@ -73,41 +73,43 @@ export function SearchField({
   const showClearButton = inputValue.length > 0;
 
   return (
-    <Flex gap="2" style={{ marginBottom: 10 }}>
-      <TextField.Root
-        placeholder={placeholder}
-        value={inputValue}
-        onChange={event => handleInputChange(event.target.value)}
-        onKeyDown={handleKeyDown}
-        style={{ flexGrow: 1 }}
-        disabled={loading}
-      >
-        <TextField.Slot>
-          <MagnifyingGlassIcon height="16" width="16" />
-        </TextField.Slot>
-        {showClearButton && (
+    <Box mb="6" mt="4">
+      <Flex gap="2">
+        <TextField.Root
+          placeholder={placeholder}
+          value={inputValue}
+          onChange={event => handleInputChange(event.target.value)}
+          onKeyDown={handleKeyDown}
+          style={{ flexGrow: 1 }}
+          disabled={loading}
+        >
           <TextField.Slot>
-            <Button
-              size="1"
-              variant="ghost"
-              onClick={handleClearSearch}
-              disabled={loading}
-              style={{ cursor: 'pointer', marginRight: 1 }}
-            >
-              <Cross2Icon height="12" width="12" />
-            </Button>
+            <MagnifyingGlassIcon height="16" width="16" />
           </TextField.Slot>
-        )}
-      </TextField.Root>
+          {showClearButton && (
+            <TextField.Slot>
+              <Button
+                size="1"
+                variant="ghost"
+                onClick={handleClearSearch}
+                disabled={loading}
+                style={{ cursor: 'pointer', marginRight: 1 }}
+              >
+                <Cross2Icon height="12" width="12" />
+              </Button>
+            </TextField.Slot>
+          )}
+        </TextField.Root>
 
-      <Button
-        onClick={onCreateNew}
-        loading={loading}
-        disabled={loading}
-        style={{ cursor: 'pointer' }}
-      >
-        <PlusIcon height="16" width="16" /> {createButtonText}
-      </Button>
-    </Flex>
+        <Button
+          onClick={onCreateNew}
+          loading={loading}
+          disabled={loading}
+          style={{ cursor: 'pointer' }}
+        >
+          <PlusIcon height="16" width="16" /> {createButtonText}
+        </Button>
+      </Flex>
+    </Box>
   );
 }
