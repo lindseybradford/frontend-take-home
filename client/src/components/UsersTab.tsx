@@ -11,7 +11,7 @@ export function UsersTab() {
     data: users,
     loading,
     error,
-    retry,
+    handleRetry,
     searchQuery,
     handleSearch,
     handleClearSearch,
@@ -41,7 +41,7 @@ export function UsersTab() {
     <TableUI
       loading={loading}
       error={error}
-      onRetry={retry}
+      onRetry={handleRetry}
       createNewText="Add user"
       onCreateNew={handleCreateNew}
       data={users}

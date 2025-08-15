@@ -58,7 +58,7 @@ export function useUsers() {
     }
   }, []);
 
-  const retry = useCallback(() => {
+  const handleRetry = useCallback(() => {
     fetchUsersWithRoles(state.searchQuery, state.currentPage);
   }, [fetchUsersWithRoles, state.searchQuery, state.currentPage]);
 
@@ -100,7 +100,7 @@ export function useUsers() {
 
   return {
     ...state,
-    retry,
+    handleRetry,
     handleSearch,
     handleClearSearch,
     handleDeleteUser,
