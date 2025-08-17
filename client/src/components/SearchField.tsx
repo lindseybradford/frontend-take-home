@@ -25,7 +25,6 @@ export function SearchField({
 }: SearchFieldProps) {
   const [inputValue, setInputValue] = useState(searchValue);
 
-  // Debounced search
   useEffect(() => {
     const timeoutId = setTimeout(() => {
       if (inputValue !== searchValue) {
@@ -38,7 +37,7 @@ export function SearchField({
 
   useEffect(() => {
     setInputValue(searchValue);
-  }, [inputValue, searchValue]);
+  }, [searchValue]);
 
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent) => {

@@ -86,8 +86,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         setSearchQuery(search ?? searchQuery);
       } catch (err) {
         setUsersError(err instanceof Error ? err.message : 'Failed to fetch users');
-        setUsers([]); // Clear users array on error
-        setPages(0); // Reset pagination
+        setUsers([]);
+        setPages(0);
       } finally {
         setUsersLoading(false);
       }
