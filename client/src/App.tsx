@@ -1,5 +1,6 @@
-import { Box, Container, Tabs, Text } from '@radix-ui/themes';
+import { Box, Container, Tabs } from '@radix-ui/themes';
 import { UsersTab } from './components/UsersTab';
+import { RolesTab } from './components/RolesTab';
 import { AppProvider } from './contexts/AppContext';
 import { ToastProvider } from './components/Toast';
 
@@ -24,7 +25,7 @@ function App() {
               </Tabs.Content>
 
               <Tabs.Content value="roles">
-                <Text size="2">Access and update your documents.</Text>
+                <RolesTab />
               </Tabs.Content>
             </Box>
           </Tabs.Root>

@@ -38,12 +38,23 @@ export interface UsersContextValue {
 
 export interface RolesContextValue {
   roles: Role[];
-  rolesMap: Map<string, Role>;
   loading: boolean;
   error: string | null;
-  refetchRoles: () => Promise<void>;
+  pages: number;
+  currentPage: number;
+  searchQuery: string;
+  searchLoading: boolean;
+  editLoading: boolean;
+  editingRoleId: string | null;
+
+  fetchRoles: (search?: string, page?: number) => Promise<void>;
+  refreshRoles: () => Promise<void>;
+  searchRoles: (query: string) => Promise<void>;
+  clearSearch: () => Promise<void>;
+  goToPage: (page: number) => Promise<void>;
   updateRole: (
     roleId: string,
+    roleName: string,
     updates: Partial<Pick<Role, 'name' | 'description' | 'isDefault'>>
   ) => Promise<void>;
 }

@@ -73,6 +73,7 @@ export const apiClient = {
     });
 
     clearCache('roles');
+    clearCache('users_');
     return result;
   },
 };
