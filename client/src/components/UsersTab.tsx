@@ -31,9 +31,6 @@ export function UsersTab() {
   } = useUsersContext();
 
   const [createLoading, setCreateLoading] = useState(false);
-
-  // Note: needs improved - somewhat janky work-around to show the dialog programatically since using the
-  // default trigger approach closes the dropdown button and removes the dialog from the DOM
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
 

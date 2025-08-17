@@ -4,6 +4,19 @@ export interface UserWithRole extends User {
   role?: Role;
 }
 
+export interface ToastState {
+  open: boolean;
+  title: string;
+  description: string;
+  type: 'success' | 'error' | 'info';
+}
+
+export interface ToastContextValue {
+  toast: ToastState;
+  showToast: (title: string, description: string, type?: 'success' | 'error' | 'info') => void;
+  hideToast: () => void;
+}
+
 export interface UsersContextValue {
   users: UserWithRole[];
   loading: boolean;

@@ -1,9 +1,16 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { apiClient } from '../api/client';
 import type { User, Role, PagedData } from '@server/models';
-import type { UsersContextValue, RolesContextValue, UserWithRole } from './types';
+import type {
+  UsersContextValue,
+  RolesContextValue,
+  UserWithRole,
+  ToastContextValue,
+  ToastState,
+} from './types';
 import { RolesContext } from './RolesContextDef';
 import { UsersContext } from './UsersContextDef';
+import { ToastContext } from './ToastContextDef';
 
 export function AppProvider({ children }: { children: React.ReactNode }) {
   const [roles, setRoles] = useState<Role[]>([]);
@@ -22,6 +29,14 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [deletingUserId, setDeletingUserId] = useState<string | null>(null);
   const [hasInitialized, setHasInitialized] = useState(false);
 
+  const [toast, setToast] = useState<ToastState>({
+    open: false,
+    title: '',
+    description: '',
+    type: 'info',
+  });
+  const toastTimerRef = useRef<number | null>(null);
+
   const rolesMap = useMemo(() => {
     return new Map(roles.map(role => [role.id, role]));
   }, [roles]);
@@ -36,6 +51,42 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     [rolesMap]
   );
 
+  const showToast = useCallback(
+    (title: string, description: string, type: 'success' | 'error' | 'info' = 'info') => {
+      if (toastTimerRef.current) {
+        clearTimeout(toastTimerRef.current);
+      }
+
+      setToast({
+        open: true,
+        title,
+        description,
+        type,
+      });
+
+      toastTimerRef.current = window.setTimeout(() => {
+        setToast(prev => ({ ...prev, open: false }));
+      }, 5000);
+    },
+    []
+  );
+
+  const hideToast = useCallback(() => {
+    if (toastTimerRef.current) {
+      clearTimeout(toastTimerRef.current);
+      toastTimerRef.current = null;
+    }
+    setToast(prev => ({ ...prev, open: false }));
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      if (toastTimerRef.current) {
+        clearTimeout(toastTimerRef.current);
+      }
+    };
+  }, []);
+
   const fetchRoles = useCallback(async () => {
     try {
       setRolesLoading(true);
@@ -43,11 +94,13 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       const response = await apiClient.getRoles();
       setRoles(response.data);
     } catch (err) {
-      setRolesError(err instanceof Error ? err.message : 'Failed to fetch roles');
+      const errorMessage = err instanceof Error ? err.message : 'Failed to fetch roles';
+      setRolesError(errorMessage);
+      showToast('Error Loading Roles', errorMessage, 'error');
     } finally {
       setRolesLoading(false);
     }
-  }, []);
+  }, [showToast]);
 
   const refetchRoles = useCallback(() => {
     return fetchRoles();
@@ -58,12 +111,15 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       try {
         const updatedRole = await apiClient.updateRole(roleId, updates);
         setRoles(prevRoles => prevRoles.map(role => (role.id === roleId ? updatedRole : role)));
+        showToast('Role Updated', 'The role has been successfully updated.', 'success');
       } catch (err) {
-        setRolesError(err instanceof Error ? err.message : 'Failed to update role');
+        const errorMessage = err instanceof Error ? err.message : 'Failed to update role';
+        setRolesError(errorMessage);
+        showToast('Error Updating Role', errorMessage, 'error');
         throw err;
       }
     },
-    []
+    [showToast]
   );
 
   const fetchUsers = useCallback(
@@ -81,7 +137,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       if (rolesMap.size === 0) {
         setUsersLoading(false);
         setSearchLoading(false);
-        setUsersError('Cannot load users: roles are required');
+        const errorMessage = 'Cannot load users: roles are required';
+        setUsersError(errorMessage);
+        showToast('Error Loading Users', errorMessage, 'error');
         return;
       }
 
@@ -102,15 +160,17 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           setHasInitialized(true);
         }
       } catch (err) {
-        setUsersError(err instanceof Error ? err.message : 'Failed to fetch users');
+        const errorMessage = err instanceof Error ? err.message : 'Failed to fetch users';
+        setUsersError(errorMessage);
         setUsers([]);
         setPages(0);
+        showToast('Error Loading Users', errorMessage, 'error');
       } finally {
         setUsersLoading(false);
         setSearchLoading(false);
       }
     },
-    [rolesMap.size, searchQuery, currentPage, joinUsersWithRoles, hasInitialized]
+    [rolesMap.size, searchQuery, currentPage, joinUsersWithRoles, hasInitialized, showToast]
   );
 
   const refreshUsers = useCallback(async () => {
@@ -136,25 +196,29 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     return fetchUsers('', 1);
   }, [fetchUsers]);
 
-  const deleteUser = useCallback(async (userId: string) => {
-    try {
-      setUsersError(null);
-      setDeleteLoading(true);
-      setDeletingUserId(userId);
+  const deleteUser = useCallback(
+    async (userId: string) => {
+      try {
+        setUsersError(null);
+        setDeleteLoading(true);
+        setDeletingUserId(userId);
 
-      await apiClient.deleteUser(userId);
-      setUsers(prevUsers => prevUsers.filter(user => user.id !== userId));
-
-      // TODO: Add success toast/notification here
-    } catch (err) {
-      setUsersError(err instanceof Error ? err.message : 'Failed to delete user');
-      // TODO: Add error toast/notification here
-      throw err;
-    } finally {
-      setDeleteLoading(false);
-      setDeletingUserId(null);
-    }
-  }, []);
+        await apiClient.deleteUser(userId);
+        setUsers(prevUsers => prevUsers.filter(user => user.id !== userId));
+        // It'd be cool to add an "UNDO" action here instead of just the FYI…
+        showToast('User Deleted', 'The user has been successfully deleted.', 'success');
+      } catch (err) {
+        const errorMessage = err instanceof Error ? err.message : 'Failed to delete user';
+        setUsersError(errorMessage);
+        showToast('Error Deleting User', errorMessage, 'error');
+        throw err;
+      } finally {
+        setDeleteLoading(false);
+        setDeletingUserId(null);
+      }
+    },
+    [showToast]
+  );
 
   const goToPage = useCallback(
     (page: number) => {
@@ -225,9 +289,17 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     updateRole,
   };
 
+  const toastContextValue: ToastContextValue = {
+    toast,
+    showToast,
+    hideToast,
+  };
+
   return (
-    <RolesContext.Provider value={rolesContextValue}>
-      <UsersContext.Provider value={usersContextValue}>{children}</UsersContext.Provider>
-    </RolesContext.Provider>
+    <ToastContext.Provider value={toastContextValue}>
+      <RolesContext.Provider value={rolesContextValue}>
+        <UsersContext.Provider value={usersContextValue}>{children}</UsersContext.Provider>
+      </RolesContext.Provider>
+    </ToastContext.Provider>
   );
 }
