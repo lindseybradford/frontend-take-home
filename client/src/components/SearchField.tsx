@@ -67,6 +67,8 @@ export function SearchField({
           value={inputValue}
           onChange={e => setInputValue(e.target.value)}
           onKeyDown={handleKeyDown}
+          aria-label={placeholder}
+          aria-describedby="search-instructions"
         >
           <TextField.Slot>
             {isSearching ? <Spinner size="1" /> : <MagnifyingGlassIcon height="16" width="16" />}

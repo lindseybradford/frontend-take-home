@@ -9,7 +9,7 @@ import {
   Table,
   Text,
 } from '@radix-ui/themes';
-import { useUsersContext } from '../contexts/useUsers';
+import { useUsersContext } from '@src/hooks/useUsers';
 import { formatDate } from '../util/formatDate';
 import { useState, useCallback } from 'react';
 import { DotsHorizontalIcon } from '@radix-ui/react-icons';

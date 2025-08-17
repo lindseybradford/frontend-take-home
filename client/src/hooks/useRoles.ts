@@ -1,5 +1,5 @@
 import { useContext } from 'react';
-import { RolesContext } from './RolesContextDef';
+import { RolesContext } from '@src/contexts/RolesContextDef';
 
 export function useRolesContext() {
   const context = useContext(RolesContext);

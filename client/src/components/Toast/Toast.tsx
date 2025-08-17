@@ -1,5 +1,5 @@
 import { Toast } from 'radix-ui';
-import { useToast } from '@src/contexts/useToast';
+import { useToast } from '@src/hooks/useToast';
 import { CheckCircledIcon, ExclamationTriangleIcon, InfoCircledIcon } from '@radix-ui/react-icons';
 import './toast.css';
 

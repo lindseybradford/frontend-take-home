@@ -15,7 +15,7 @@ import {
 
 import { formatDate } from '../util/formatDate';
 import { DotsHorizontalIcon } from '@radix-ui/react-icons';
-import { useRolesContext } from '@src/contexts/useRoles';
+import { useRolesContext } from '@src/hooks/useRoles';
 import type { Role } from '@server/models';
 import { useCallback, useState } from 'react';
 
