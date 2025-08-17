@@ -30,20 +30,12 @@ export function UsersTab() {
     deleteUser,
   } = useUsersContext();
 
-  const [createLoading, setCreateLoading] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
 
-  const handleCreateNew = useCallback(async () => {
-    setCreateLoading(true);
-    try {
-      // TODO: add new user workflow (not in README…)?
-    } catch (error) {
-      console.error('Failed to create user:', error);
-    } finally {
-      setCreateLoading(false);
-    }
-  }, []);
+  const handleCreateNew = () => {
+    // TODO: add new user workflow (not in README…)?
+  };
 
   const handleDeleteUser = useCallback(
     async (userId: string) => {
@@ -70,8 +62,6 @@ export function UsersTab() {
     [deleteLoading, deletingUserId]
   );
 
-  const isLoading = loading || createLoading;
-
   return (
     <TableUI
       loading={loading}
@@ -85,7 +75,7 @@ export function UsersTab() {
       searchLoading={searchLoading}
       deleteLoading={deleteLoading}
       searchConfig={{
-        loading: isLoading,
+        loading: loading,
         searchValue: searchQuery,
         placeholder: 'Search users by name',
         createButtonText: 'Add User',
