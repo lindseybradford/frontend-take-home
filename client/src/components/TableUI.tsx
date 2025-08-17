@@ -1,6 +1,6 @@
 import React from 'react';
 import useSillyLoadingText from '@src/util/sillyLoading';
-import { Button, Flex, Spinner, Text, Box } from '@radix-ui/themes';
+import { Button, Flex, Spinner, Text } from '@radix-ui/themes';
 import { ExclamationTriangleIcon, PersonIcon, PlusIcon, ReloadIcon } from '@radix-ui/react-icons';
 import { SearchField } from '@src/components/SearchField';
 
