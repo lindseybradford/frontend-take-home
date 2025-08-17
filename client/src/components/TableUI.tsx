@@ -50,10 +50,10 @@ export function TableUI<T = unknown>({
         <ExclamationTriangleIcon width="18" height="18" />
         <Flex direction="column" align="center" gap="1">
           <Text as="p" weight="bold" size="2">
-            {statusHeading || 'An error occurred'}
+            An error occurred
           </Text>
           <Text as="p" color="gray" size="2">
-            {statusMessage || 'Please try again and contact support if the issue persists.'}
+            Please try again and contact support if the issue persists.
           </Text>
         </Flex>
         {onRetry && (

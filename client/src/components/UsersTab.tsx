@@ -11,7 +11,7 @@ export function UsersTab() {
   const { users, loading, error, searchQuery, refreshUsers, searchUsers, clearSearch, deleteUser } =
     useUsersContext();
 
-  console.log(loading, error);
+  console.log(`useUsersContext = loading: ${loading}, error: ${error}`);
 
   const [createLoading, setCreateLoading] = useState(false);
 
@@ -23,7 +23,7 @@ export function UsersTab() {
   const handleCreateNew = useCallback(async () => {
     setCreateLoading(true);
     try {
-      // TODO: add user logic?
+      // TODO: add new user workflow (not in README…)?
     } catch (error) {
       console.error('Failed to create user:', error);
     } finally {

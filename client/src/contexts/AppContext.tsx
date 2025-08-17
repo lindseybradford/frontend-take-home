@@ -95,9 +95,17 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     [rolesMap.size, searchQuery, currentPage, joinUsersWithRoles]
   );
 
-  const refreshUsers = useCallback(() => {
-    return fetchUsers(searchQuery, currentPage);
-  }, [fetchUsers, searchQuery, currentPage]);
+  const refreshUsers = useCallback(async () => {
+    if (rolesMap.size === 0) {
+      try {
+        await fetchRoles();
+      } catch (err) {
+        console.error('Failed to refresh roles:', err);
+      }
+    } else {
+      return fetchUsers(searchQuery, currentPage);
+    }
+  }, [rolesMap.size, fetchRoles, fetchUsers, searchQuery, currentPage]);
 
   const searchUsers = useCallback(
     (query: string) => {
@@ -138,14 +146,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       if (rolesMap.size > 0 && users.length === 0 && !usersLoading) {
         // Roles loaded successfully, fetch users
         fetchUsers();
-      } else if (rolesMap.size === 0 && usersLoading) {
-        // Roles failed to load, stop users loading
-        setUsersLoading(false);
-        setUsersError(
-          rolesError
-            ? `Cannot load users: ${rolesError}`
-            : 'Cannot load users: roles failed to load'
-        );
+      } else if (rolesMap.size === 0 && rolesError) {
+        setUsersError(`Cannot load users: ${rolesError}`);
       }
     }
   }, [rolesLoading, rolesMap.size, users.length, usersLoading, rolesError, fetchUsers]);
@@ -172,7 +174,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   const usersContextValue: UsersContextValue = {
     users,
-    loading: usersLoading,
+    loading: usersLoading || rolesLoading,
     error: usersError,
     pages,
     currentPage,
