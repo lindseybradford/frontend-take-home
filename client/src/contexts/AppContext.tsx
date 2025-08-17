@@ -17,6 +17,11 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [currentPage, setCurrentPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState('');
 
+  const [searchLoading, setSearchLoading] = useState(false);
+  const [deleteLoading, setDeleteLoading] = useState(false);
+  const [deletingUserId, setDeletingUserId] = useState<string | null>(null);
+  const [hasInitialized, setHasInitialized] = useState(false);
+
   const rolesMap = useMemo(() => {
     return new Map(roles.map(role => [role.id, role]));
   }, [roles]);
@@ -63,11 +68,19 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   const fetchUsers = useCallback(
     async (search?: string, page?: number) => {
-      setUsersLoading(true);
+      const isSearchOperation = search !== undefined && search !== searchQuery;
+
+      if (isSearchOperation) {
+        setSearchLoading(true);
+      } else {
+        setUsersLoading(true);
+      }
+
       setUsersError(null);
 
       if (rolesMap.size === 0) {
         setUsersLoading(false);
+        setSearchLoading(false);
         setUsersError('Cannot load users: roles are required');
         return;
       }
@@ -84,15 +97,20 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         setPages(response.pages);
         setCurrentPage(page ?? currentPage);
         setSearchQuery(search ?? searchQuery);
+
+        if (!hasInitialized) {
+          setHasInitialized(true);
+        }
       } catch (err) {
         setUsersError(err instanceof Error ? err.message : 'Failed to fetch users');
         setUsers([]);
         setPages(0);
       } finally {
         setUsersLoading(false);
+        setSearchLoading(false);
       }
     },
-    [rolesMap.size, searchQuery, currentPage, joinUsersWithRoles]
+    [rolesMap.size, searchQuery, currentPage, joinUsersWithRoles, hasInitialized]
   );
 
   const refreshUsers = useCallback(async () => {
@@ -121,11 +139,20 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const deleteUser = useCallback(async (userId: string) => {
     try {
       setUsersError(null);
+      setDeleteLoading(true);
+      setDeletingUserId(userId);
+
       await apiClient.deleteUser(userId);
       setUsers(prevUsers => prevUsers.filter(user => user.id !== userId));
+
+      // TODO: Add success toast/notification here
     } catch (err) {
       setUsersError(err instanceof Error ? err.message : 'Failed to delete user');
+      // TODO: Add error toast/notification here
       throw err;
+    } finally {
+      setDeleteLoading(false);
+      setDeletingUserId(null);
     }
   }, []);
 
@@ -143,14 +170,13 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   // Auto-fetch users after roles are loaded (success or failure)
   useEffect(() => {
     if (!rolesLoading) {
-      if (rolesMap.size > 0 && users.length === 0 && !usersLoading) {
-        // Roles loaded successfully, fetch users
+      if (rolesMap.size > 0 && !hasInitialized && !usersLoading) {
         fetchUsers();
       } else if (rolesMap.size === 0 && rolesError) {
         setUsersError(`Cannot load users: ${rolesError}`);
       }
     }
-  }, [rolesLoading, rolesMap.size, users.length, usersLoading, rolesError, fetchUsers]);
+  }, [rolesLoading, rolesMap.size, hasInitialized, usersLoading, rolesError, fetchUsers]);
 
   // Re-enrich if roles change
   useEffect(() => {
@@ -179,6 +205,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     pages,
     currentPage,
     searchQuery,
+    searchLoading,
+    deleteLoading,
+    deletingUserId,
     fetchUsers,
     refreshUsers,
     searchUsers,

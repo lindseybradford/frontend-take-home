@@ -11,6 +11,9 @@ export interface UsersContextValue {
   pages: number;
   currentPage: number;
   searchQuery: string;
+  searchLoading: boolean;
+  deleteLoading: boolean;
+  deletingUserId: string | null;
 
   fetchUsers: (search?: string, page?: number) => Promise<void>;
   refreshUsers: () => Promise<void>;

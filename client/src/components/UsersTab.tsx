@@ -1,6 +1,14 @@
 import { TableUI } from './TableUI';
-import { AlertDialog, Avatar, Button, DropdownMenu, Flex, Table, Text } from '@radix-ui/themes';
-import { SearchField } from '@src/components/SearchField';
+import {
+  AlertDialog,
+  Avatar,
+  Button,
+  DropdownMenu,
+  Flex,
+  Spinner,
+  Table,
+  Text,
+} from '@radix-ui/themes';
 import { useUsersContext } from '../contexts/useUsers';
 import { formatDate } from '../util/formatDate';
 import { useState, useCallback } from 'react';
@@ -8,10 +16,19 @@ import { DotsHorizontalIcon } from '@radix-ui/react-icons';
 import type { User } from '@server/models';
 
 export function UsersTab() {
-  const { users, loading, error, searchQuery, refreshUsers, searchUsers, clearSearch, deleteUser } =
-    useUsersContext();
-
-  console.log(`useUsersContext = loading: ${loading}, error: ${error}`);
+  const {
+    users,
+    loading,
+    error,
+    searchQuery,
+    searchLoading,
+    deleteLoading,
+    deletingUserId,
+    refreshUsers,
+    searchUsers,
+    clearSearch,
+    deleteUser,
+  } = useUsersContext();
 
   const [createLoading, setCreateLoading] = useState(false);
 
@@ -49,6 +66,13 @@ export function UsersTab() {
     setDialogOpen(true);
   }, []);
 
+  const isUserDeleting = useCallback(
+    (userId: string) => {
+      return deleteLoading && deletingUserId === userId;
+    },
+    [deleteLoading, deletingUserId]
+  );
+
   const isLoading = loading || createLoading;
 
   return (
@@ -61,18 +85,20 @@ export function UsersTab() {
       data={users}
       statusHeading="No users found"
       statusMessage="Add a user to get started."
+      searchLoading={searchLoading}
+      deleteLoading={deleteLoading}
+      searchConfig={{
+        loading: isLoading,
+        searchValue: searchQuery,
+        placeholder: 'Search users by name',
+        createButtonText: 'Add User',
+        onSearch: searchUsers,
+        onCreateNew: handleCreateNew,
+        onClearSearch: clearSearch,
+        debounceMs: 300,
+        isSearching: searchLoading,
+      }}
     >
-      <SearchField
-        loading={isLoading}
-        searchValue={searchQuery}
-        placeholder="Search users by name"
-        createButtonText="Add User"
-        onSearch={searchUsers}
-        onCreateNew={handleCreateNew}
-        onClearSearch={clearSearch}
-        debounceMs={300}
-      />
-
       <Table.Root variant="surface">
         <Table.Header>
           <Table.Row>
@@ -84,58 +110,78 @@ export function UsersTab() {
         </Table.Header>
 
         <Table.Body>
-          {users.map(user => (
-            <Table.Row key={user.id} align="center">
-              <Table.RowHeaderCell>
-                <Flex align="center" gap="2">
-                  <Avatar
-                    src={user.photo}
-                    fallback={`${user.first[0]}${user.last[0]}`}
-                    radius="full"
-                    size="2"
-                  />
-                  <Text size="2">
-                    {user.first} {user.last}
-                  </Text>
-                </Flex>
-              </Table.RowHeaderCell>
-              <Table.Cell>{user.role?.name || 'Unknown'}</Table.Cell>
-              <Table.Cell>
-                {formatDate(user.createdAt, {
-                  year: 'numeric',
-                  month: 'long',
-                  day: '2-digit',
-                })}
-              </Table.Cell>
-              <Table.Cell>
-                <DropdownMenu.Root>
-                  <DropdownMenu.Trigger>
-                    <Button
-                      variant="ghost"
-                      size="3"
-                      color="gray"
+          {users.map(user => {
+            const isDeleting = isUserDeleting(user.id);
+
+            return (
+              <Table.Row
+                key={user.id}
+                align="center"
+                style={{
+                  opacity: isDeleting ? 0.5 : 1,
+                  pointerEvents: isDeleting ? 'none' : 'auto',
+                }}
+              >
+                <Table.RowHeaderCell>
+                  <Flex align="center" gap="2">
+                    <Avatar
+                      src={user.photo}
+                      fallback={`${user.first[0]}${user.last[0]}`}
                       radius="full"
-                      style={{ paddingLeft: 6, paddingRight: 6, cursor: 'pointer' }}
-                    >
-                      <DotsHorizontalIcon height="16" width="16" />
-                    </Button>
-                  </DropdownMenu.Trigger>
-                  <DropdownMenu.Content alignOffset={-80}>
-                    <DropdownMenu.Item style={{ cursor: 'pointer' }}>Edit user</DropdownMenu.Item>
-                    <DropdownMenu.Item
-                      style={{ cursor: 'pointer' }}
-                      onClick={e => {
-                        e.preventDefault();
-                        openDeleteDialog(user);
-                      }}
-                    >
-                      Delete user
-                    </DropdownMenu.Item>
-                  </DropdownMenu.Content>
-                </DropdownMenu.Root>
-              </Table.Cell>
-            </Table.Row>
-          ))}
+                      size="2"
+                    />
+                    <Text size="2">
+                      {user.first} {user.last}
+                    </Text>
+                  </Flex>
+                </Table.RowHeaderCell>
+                <Table.Cell>{user.role?.name || 'Unknown'}</Table.Cell>
+                <Table.Cell>
+                  {formatDate(user.createdAt, {
+                    year: 'numeric',
+                    month: 'long',
+                    day: '2-digit',
+                  })}
+                </Table.Cell>
+                <Table.Cell>
+                  <DropdownMenu.Root>
+                    <DropdownMenu.Trigger>
+                      <Button
+                        variant="ghost"
+                        size="3"
+                        color="gray"
+                        radius="full"
+                        disabled={isDeleting}
+                        style={{
+                          paddingLeft: 6,
+                          paddingRight: 6,
+                          cursor: isDeleting ? 'not-allowed' : 'pointer',
+                        }}
+                      >
+                        {isDeleting ? (
+                          <Spinner size="1" />
+                        ) : (
+                          <DotsHorizontalIcon height="16" width="16" />
+                        )}
+                      </Button>
+                    </DropdownMenu.Trigger>
+                    <DropdownMenu.Content alignOffset={-80}>
+                      <DropdownMenu.Item style={{ cursor: 'pointer' }}>Edit user</DropdownMenu.Item>
+                      <DropdownMenu.Item
+                        style={{ cursor: 'pointer' }}
+                        onClick={e => {
+                          e.preventDefault();
+                          openDeleteDialog(user);
+                        }}
+                      >
+                        Delete user
+                      </DropdownMenu.Item>
+                    </DropdownMenu.Content>
+                  </DropdownMenu.Root>
+                </Table.Cell>
+              </Table.Row>
+            );
+          })}
         </Table.Body>
       </Table.Root>
 

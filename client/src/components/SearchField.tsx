@@ -1,9 +1,8 @@
-import { Box, Flex, Button, TextField } from '@radix-ui/themes';
+import { Box, Flex, Button, TextField, Spinner } from '@radix-ui/themes';
 import { MagnifyingGlassIcon, PlusIcon, Cross2Icon } from '@radix-ui/react-icons';
 import { useState, useEffect, useCallback } from 'react';
 
 interface SearchFieldProps {
-  loading: boolean;
   searchValue: string;
   placeholder: string;
   createButtonText: string;
@@ -11,10 +10,10 @@ interface SearchFieldProps {
   onCreateNew: () => void;
   onClearSearch: () => void;
   debounceMs?: number;
+  isSearching?: boolean;
 }
 
 export function SearchField({
-  loading,
   searchValue,
   placeholder,
   createButtonText,
@@ -22,6 +21,7 @@ export function SearchField({
   onCreateNew,
   onClearSearch,
   debounceMs = 300,
+  isSearching = false,
 }: SearchFieldProps) {
   const [inputValue, setInputValue] = useState(searchValue);
 
@@ -63,24 +63,29 @@ export function SearchField({
         <TextField.Root
           placeholder={placeholder}
           style={{ flexGrow: 1 }}
-          disabled={loading}
+          disabled={isSearching}
           value={inputValue}
           onChange={e => setInputValue(e.target.value)}
           onKeyDown={handleKeyDown}
         >
           <TextField.Slot>
-            <MagnifyingGlassIcon height="16" width="16" />
+            {isSearching ? <Spinner size="1" /> : <MagnifyingGlassIcon height="16" width="16" />}
           </TextField.Slot>
           {inputValue && (
             <TextField.Slot>
-              <Button size="1" variant="ghost" onClick={handleClear} style={{ cursor: 'pointer' }}>
+              <Button
+                size="1"
+                variant="ghost"
+                onClick={handleClear}
+                style={{ cursor: 'pointer', marginRight: 1 }}
+              >
                 <Cross2Icon height="12" width="12" />
               </Button>
             </TextField.Slot>
           )}
         </TextField.Root>
 
-        <Button onClick={onCreateNew} loading={loading} style={{ cursor: 'pointer' }}>
+        <Button onClick={onCreateNew} style={{ cursor: 'pointer' }}>
           <PlusIcon height="16" width="16" /> {createButtonText}
         </Button>
       </Flex>
