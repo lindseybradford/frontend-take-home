@@ -186,22 +186,29 @@ export function UsersTab() {
         <AlertDialog.Content maxWidth="450px">
           <AlertDialog.Title>Delete user</AlertDialog.Title>
           <AlertDialog.Description size="2">
-            Are you sure? This will delete "{selectedUser?.first} {selectedUser?.last}" and all of
-            their data.
+            Are you sure? This will delete{' '}
+            <b>
+              "{selectedUser?.first} {selectedUser?.last}"
+            </b>{' '}
+            and all of their data.
           </AlertDialog.Description>
 
           <Flex gap="3" mt="4" justify="end">
             <AlertDialog.Cancel>
-              <Button variant="soft" color="gray" style={{ cursor: 'pointer' }}>
+              <Button
+                variant="surface"
+                color="gray"
+                style={{ cursor: 'pointer', fontWeight: 'bold' }}
+              >
                 Cancel
               </Button>
             </AlertDialog.Cancel>
             <AlertDialog.Action>
               <Button
                 onClick={() => selectedUser && handleDeleteUser(selectedUser.id)}
-                variant="solid"
+                variant="surface"
                 color="red"
-                style={{ cursor: 'pointer' }}
+                style={{ cursor: 'pointer', fontWeight: 'bold' }}
               >
                 Delete user
               </Button>
