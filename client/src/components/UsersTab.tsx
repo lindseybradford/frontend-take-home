@@ -5,15 +5,172 @@ import {
   Button,
   DropdownMenu,
   Flex,
+  Portal,
   Spinner,
   Table,
   Text,
 } from '@radix-ui/themes';
 import { useUsersContext } from '@src/hooks/useUsers';
 import { formatDate } from '../util/formatDate';
-import { useState, useCallback } from 'react';
+import { useRef, useState, useCallback } from 'react';
 import { DotsHorizontalIcon } from '@radix-ui/react-icons';
-import type { User } from '@server/models';
+import type { UserWithRole } from '@src/contexts/types';
+
+function UserRow({
+  user,
+  isDeleting,
+  onDeleteUser,
+}: {
+  user: UserWithRole;
+  isDeleting: boolean;
+  onDeleteUser: (userId: string) => Promise<void>;
+}) {
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const dropdownTriggerRef = useRef<HTMLButtonElement>(null);
+
+  const handleDialogOpenChange = useCallback((open: boolean) => {
+    setDialogOpen(open);
+    if (open) {
+      setDropdownOpen(false);
+    }
+  }, []);
+
+  const handleDropdownOpenChange = useCallback(
+    (open: boolean) => {
+      if (!dialogOpen) {
+        setDropdownOpen(open);
+      }
+    },
+    [dialogOpen]
+  );
+
+  const handleDeleteClick = useCallback(() => {
+    setDropdownOpen(false);
+    setDialogOpen(true);
+  }, []);
+
+  const handleDeleteConfirm = useCallback(async () => {
+    try {
+      await onDeleteUser(user.id);
+      setDialogOpen(false);
+    } catch (error) {
+      console.error('Failed to delete user:', error);
+    }
+  }, [user.id, onDeleteUser]);
+
+  return (
+    <>
+      <Table.Row
+        key={user.id}
+        align="center"
+        style={{
+          opacity: isDeleting ? 0.5 : 1,
+          pointerEvents: isDeleting ? 'none' : 'auto',
+        }}
+      >
+        <Table.RowHeaderCell>
+          <Flex align="center" gap="2">
+            <Avatar
+              src={user.photo}
+              fallback={`${user.first[0]}${user.last[0]}`}
+              radius="full"
+              size="2"
+            />
+            <Text size="2">
+              {user.first} {user.last}
+            </Text>
+          </Flex>
+        </Table.RowHeaderCell>
+        <Table.Cell>{user.role?.name || 'Unknown'}</Table.Cell>
+        <Table.Cell>
+          {formatDate(user.createdAt, {
+            year: 'numeric',
+            month: 'long',
+            day: '2-digit',
+          })}
+        </Table.Cell>
+        <Table.Cell>
+          <DropdownMenu.Root open={dropdownOpen} onOpenChange={handleDropdownOpenChange}>
+            <DropdownMenu.Trigger>
+              <Button
+                variant="ghost"
+                size="3"
+                color="gray"
+                radius="full"
+                disabled={isDeleting}
+                style={{
+                  paddingLeft: 6,
+                  paddingRight: 6,
+                  cursor: isDeleting ? 'not-allowed' : 'pointer',
+                }}
+                ref={dropdownTriggerRef}
+              >
+                {isDeleting ? <Spinner size="1" /> : <DotsHorizontalIcon height="16" width="16" />}
+              </Button>
+            </DropdownMenu.Trigger>
+            <DropdownMenu.Content
+              alignOffset={-80}
+              onCloseAutoFocus={event => {
+                if (dropdownTriggerRef.current) {
+                  dropdownTriggerRef.current.focus();
+                  event.preventDefault();
+                }
+              }}
+            >
+              <DropdownMenu.Item style={{ cursor: 'pointer' }}>Edit user</DropdownMenu.Item>
+              <DropdownMenu.Item style={{ cursor: 'pointer' }} onSelect={handleDeleteClick}>
+                Delete user
+              </DropdownMenu.Item>
+            </DropdownMenu.Content>
+          </DropdownMenu.Root>
+        </Table.Cell>
+      </Table.Row>
+
+      <AlertDialog.Root open={dialogOpen} onOpenChange={handleDialogOpenChange}>
+        <Portal>
+          <AlertDialog.Content
+            className="DialogContent"
+            onOpenAutoFocus={event => {
+              event.preventDefault();
+            }}
+          >
+            <AlertDialog.Title>Delete user</AlertDialog.Title>
+            <AlertDialog.Description>
+              Are you sure? This will delete{' '}
+              <b>
+                "{user.first} {user.last}"
+              </b>{' '}
+              and all of their data.
+            </AlertDialog.Description>
+
+            <Flex gap="3" mt="4" justify="end">
+              <AlertDialog.Cancel>
+                <Button
+                  variant="surface"
+                  color="gray"
+                  style={{ cursor: 'pointer', fontWeight: 'bold' }}
+                >
+                  Cancel
+                </Button>
+              </AlertDialog.Cancel>
+              <AlertDialog.Action>
+                <Button
+                  onClick={handleDeleteConfirm}
+                  variant="surface"
+                  color="red"
+                  style={{ cursor: 'pointer', fontWeight: 'bold' }}
+                >
+                  Delete user
+                </Button>
+              </AlertDialog.Action>
+            </Flex>
+          </AlertDialog.Content>
+        </Portal>
+      </AlertDialog.Root>
+    </>
+  );
+}
 
 export function UsersTab() {
   const {
@@ -30,30 +187,9 @@ export function UsersTab() {
     deleteUser,
   } = useUsersContext();
 
-  const [dialogOpen, setDialogOpen] = useState(false);
-  const [selectedUser, setSelectedUser] = useState<User | null>(null);
-
   const handleCreateNew = () => {
     // TODO: add new user workflow (not in README…)?
   };
-
-  const handleDeleteUser = useCallback(
-    async (userId: string) => {
-      try {
-        await deleteUser(userId);
-        setDialogOpen(false);
-        setSelectedUser(null);
-      } catch (error) {
-        console.error('Failed to delete user:', error);
-      }
-    },
-    [deleteUser]
-  );
-
-  const openDeleteDialog = useCallback((user: User) => {
-    setSelectedUser(user);
-    setDialogOpen(true);
-  }, []);
 
   const isUserDeleting = useCallback(
     (userId: string) => {
@@ -97,115 +233,16 @@ export function UsersTab() {
         </Table.Header>
 
         <Table.Body>
-          {users.map(user => {
-            const isDeleting = isUserDeleting(user.id);
-
-            return (
-              <Table.Row
-                key={user.id}
-                align="center"
-                style={{
-                  opacity: isDeleting ? 0.5 : 1,
-                  pointerEvents: isDeleting ? 'none' : 'auto',
-                }}
-              >
-                <Table.RowHeaderCell>
-                  <Flex align="center" gap="2">
-                    <Avatar
-                      src={user.photo}
-                      fallback={`${user.first[0]}${user.last[0]}`}
-                      radius="full"
-                      size="2"
-                    />
-                    <Text size="2">
-                      {user.first} {user.last}
-                    </Text>
-                  </Flex>
-                </Table.RowHeaderCell>
-                <Table.Cell>{user.role?.name || 'Unknown'}</Table.Cell>
-                <Table.Cell>
-                  {formatDate(user.createdAt, {
-                    year: 'numeric',
-                    month: 'long',
-                    day: '2-digit',
-                  })}
-                </Table.Cell>
-                <Table.Cell>
-                  <DropdownMenu.Root>
-                    <DropdownMenu.Trigger>
-                      <Button
-                        variant="ghost"
-                        size="3"
-                        color="gray"
-                        radius="full"
-                        disabled={isDeleting}
-                        style={{
-                          paddingLeft: 6,
-                          paddingRight: 6,
-                          cursor: isDeleting ? 'not-allowed' : 'pointer',
-                        }}
-                      >
-                        {isDeleting ? (
-                          <Spinner size="1" />
-                        ) : (
-                          <DotsHorizontalIcon height="16" width="16" />
-                        )}
-                      </Button>
-                    </DropdownMenu.Trigger>
-                    <DropdownMenu.Content alignOffset={-80}>
-                      <DropdownMenu.Item style={{ cursor: 'pointer' }}>Edit user</DropdownMenu.Item>
-                      <DropdownMenu.Item
-                        style={{ cursor: 'pointer' }}
-                        onClick={e => {
-                          e.preventDefault();
-                          openDeleteDialog(user);
-                        }}
-                      >
-                        Delete user
-                      </DropdownMenu.Item>
-                    </DropdownMenu.Content>
-                  </DropdownMenu.Root>
-                </Table.Cell>
-              </Table.Row>
-            );
-          })}
+          {users.map(user => (
+            <UserRow
+              key={user.id}
+              user={user}
+              isDeleting={isUserDeleting(user.id)}
+              onDeleteUser={deleteUser}
+            />
+          ))}
         </Table.Body>
       </Table.Root>
-
-      <AlertDialog.Root open={dialogOpen} onOpenChange={setDialogOpen}>
-        <AlertDialog.Content maxWidth="450px">
-          <AlertDialog.Title>Delete user</AlertDialog.Title>
-          <AlertDialog.Description size="2">
-            Are you sure? This will delete{' '}
-            <b>
-              "{selectedUser?.first} {selectedUser?.last}"
-            </b>{' '}
-            and all of their data.
-          </AlertDialog.Description>
-
-          <Flex gap="3" mt="4" justify="end">
-            <AlertDialog.Cancel>
-              <Button
-                variant="surface"
-                color="gray"
-                style={{ cursor: 'pointer', fontWeight: 'bold' }}
-              >
-                Cancel
-              </Button>
-            </AlertDialog.Cancel>
-            <AlertDialog.Action>
-              <Button
-                onClick={() => selectedUser && handleDeleteUser(selectedUser.id)}
-                variant="surface"
-                color="red"
-                style={{ cursor: 'pointer', fontWeight: 'bold' }}
-              >
-                Delete user
-              </Button>
-            </AlertDialog.Action>
-          </Flex>
-        </AlertDialog.Content>
-      </AlertDialog.Root>
     </TableUI>
   );
 }
