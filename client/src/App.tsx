@@ -10,7 +10,7 @@ function App() {
       <ToastProvider>
         <Container size="4" py={{ initial: '4', lg: '8' }} px="4">
           <Tabs.Root defaultValue="users">
-            <Tabs.List>
+            <Tabs.List aria-label="Data tables navigation">
               <Tabs.Trigger value="users" style={{ cursor: 'pointer' }}>
                 Users
               </Tabs.Trigger>
