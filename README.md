@@ -69,6 +69,7 @@ src/
 - **Table Polish**: Add sortable columns for better data navigation
 - **Visual Consistency**: Establish color coding for role badges and carry those same colors through to the Users table to create visual connections between related data
 - **Role Usage Metrics**: Display user counts for each role, either by aggregating data client-side (simpler but less performant) or by extending the server API to include counts (preferred for performance)
+- **Roles Pagination**: I wanted to show this is built, but in practice, I would hide it if the response was `pages=null`
 
 ### Functionality
 

@@ -119,6 +119,8 @@ export function RolesTab() {
     roles,
     loading,
     error,
+    pages,
+    currentPage,
     searchQuery,
     searchLoading,
     editLoading,
@@ -127,6 +129,7 @@ export function RolesTab() {
     clearSearch,
     refreshRoles,
     updateRole,
+    goToPage,
   } = useRolesContext();
 
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -217,6 +220,35 @@ export function RolesTab() {
             />
           ))}
         </Grid>
+        <Box style={{ borderTop: `1px solid #E8E8E8`, marginTop: 24, paddingTop: 16 }}>
+          <Flex gap="2" justify="end">
+            <Button
+              variant="surface"
+              color="gray"
+              disabled={currentPage <= 1 || loading || searchLoading}
+              size="1"
+              onClick={() => goToPage(currentPage - 1)}
+              style={{
+                cursor: currentPage > 1 && !loading && !searchLoading ? 'pointer' : 'not-allowed',
+              }}
+            >
+              Prev
+            </Button>
+            <Button
+              variant="surface"
+              color="gray"
+              disabled={currentPage >= pages || loading || searchLoading}
+              size="1"
+              onClick={() => goToPage(currentPage + 1)}
+              style={{
+                cursor:
+                  currentPage < pages && !loading && !searchLoading ? 'pointer' : 'not-allowed',
+              }}
+            >
+              Next
+            </Button>
+          </Flex>
+        </Box>
       </DataUI>
 
       <Dialog.Root open={dialogOpen} onOpenChange={handleDialogOpenChange}>

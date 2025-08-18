@@ -91,40 +91,46 @@ function UserRow({
             day: '2-digit',
           })}
         </Table.Cell>
-        <Table.Cell>
-          <DropdownMenu.Root open={dropdownOpen} onOpenChange={handleDropdownOpenChange}>
-            <DropdownMenu.Trigger>
-              <Button
-                variant="ghost"
-                size="3"
-                color="gray"
-                radius="full"
-                disabled={isDeleting}
-                style={{
-                  paddingLeft: 6,
-                  paddingRight: 6,
-                  cursor: isDeleting ? 'not-allowed' : 'pointer',
+        <Table.Cell style={{ width: '100px' }}>
+          <Flex gap="2" justify="end">
+            <DropdownMenu.Root open={dropdownOpen} onOpenChange={handleDropdownOpenChange}>
+              <DropdownMenu.Trigger>
+                <Button
+                  variant="ghost"
+                  size="3"
+                  color="gray"
+                  radius="full"
+                  disabled={isDeleting}
+                  style={{
+                    padding: 8,
+                    marginRight: 2,
+                    cursor: isDeleting ? 'not-allowed' : 'pointer',
+                  }}
+                  ref={dropdownTriggerRef}
+                >
+                  {isDeleting ? (
+                    <Spinner size="1" />
+                  ) : (
+                    <DotsHorizontalIcon height="16" width="16" />
+                  )}
+                </Button>
+              </DropdownMenu.Trigger>
+              <DropdownMenu.Content
+                alignOffset={-80}
+                onCloseAutoFocus={event => {
+                  if (dropdownTriggerRef.current) {
+                    dropdownTriggerRef.current.focus();
+                    event.preventDefault();
+                  }
                 }}
-                ref={dropdownTriggerRef}
               >
-                {isDeleting ? <Spinner size="1" /> : <DotsHorizontalIcon height="16" width="16" />}
-              </Button>
-            </DropdownMenu.Trigger>
-            <DropdownMenu.Content
-              alignOffset={-80}
-              onCloseAutoFocus={event => {
-                if (dropdownTriggerRef.current) {
-                  dropdownTriggerRef.current.focus();
-                  event.preventDefault();
-                }
-              }}
-            >
-              <DropdownMenu.Item style={{ cursor: 'pointer' }}>Edit user</DropdownMenu.Item>
-              <DropdownMenu.Item style={{ cursor: 'pointer' }} onSelect={handleDeleteClick}>
-                Delete user
-              </DropdownMenu.Item>
-            </DropdownMenu.Content>
-          </DropdownMenu.Root>
+                <DropdownMenu.Item style={{ cursor: 'pointer' }}>Edit user</DropdownMenu.Item>
+                <DropdownMenu.Item style={{ cursor: 'pointer' }} onSelect={handleDeleteClick}>
+                  Delete user
+                </DropdownMenu.Item>
+              </DropdownMenu.Content>
+            </DropdownMenu.Root>
+          </Flex>
         </Table.Cell>
       </Table.Row>
 
@@ -178,6 +184,8 @@ export function UsersTab() {
     users,
     loading,
     error,
+    pages,
+    currentPage,
     searchQuery,
     searchLoading,
     deleteLoading,
@@ -186,6 +194,7 @@ export function UsersTab() {
     searchUsers,
     clearSearch,
     deleteUser,
+    goToPage,
   } = useUsersContext();
 
   const handleCreateNew = () => {
@@ -242,6 +251,42 @@ export function UsersTab() {
               onDeleteUser={deleteUser}
             />
           ))}
+          <Table.Row>
+            <Table.RowHeaderCell></Table.RowHeaderCell>
+            <Table.Cell></Table.Cell>
+            <Table.Cell></Table.Cell>
+            <Table.Cell>
+              <Flex gap="2" justify="end">
+                <Button
+                  variant="surface"
+                  color="gray"
+                  disabled={currentPage <= 1 || loading || searchLoading}
+                  size="1"
+                  onClick={() => goToPage(currentPage - 1)}
+                  style={{
+                    cursor:
+                      currentPage > 1 && !loading && !searchLoading ? 'pointer' : 'not-allowed',
+                  }}
+                >
+                  Prev
+                </Button>
+
+                <Button
+                  variant="surface"
+                  color="gray"
+                  disabled={currentPage >= pages || loading || searchLoading}
+                  size="1"
+                  onClick={() => goToPage(currentPage + 1)}
+                  style={{
+                    cursor:
+                      currentPage < pages && !loading && !searchLoading ? 'pointer' : 'not-allowed',
+                  }}
+                >
+                  Next
+                </Button>
+              </Flex>
+            </Table.Cell>
+          </Table.Row>
         </Table.Body>
       </Table.Root>
     </DataUI>
