@@ -84,6 +84,7 @@ function UserRow({
         </Table.RowHeaderCell>
         <Table.Cell>{user.role?.name || 'Unknown'}</Table.Cell>
         <Table.Cell>
+          Date created:{' '}
           {formatDate(user.createdAt, {
             year: 'numeric',
             month: 'long',

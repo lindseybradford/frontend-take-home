@@ -66,6 +66,9 @@ src/
 - **Better Error Handling**: Replace toast notifications for role validation errors with inline modal messages for a smoother, less jarring experience
 - **Search-Specific Empty States**: Create dedicated empty states for search results instead of falling back to the general "no data" state
 - **Loading State Polish**: Eliminate the brief flash of empty table during search transitions
+- **Table Polish**: Add sortable columns for better data navigation
+- **Visual Consistency**: Establish color coding for role badges and carry those same colors through to the Users table to create visual connections between related data
+- **Role Usage Metrics**: Display user counts for each role, either by aggregating data client-side (simpler but less performant) or by extending the server API to include counts (preferred for performance)
 
 ### Functionality
 

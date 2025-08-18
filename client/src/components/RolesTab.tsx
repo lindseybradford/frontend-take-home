@@ -1,17 +1,21 @@
 import { DataUI } from './DataUI';
 import {
+  Avatar,
   Badge,
+  Card,
+  Box,
   Button,
   Dialog,
   DropdownMenu,
   Flex,
+  Grid,
   Portal,
   Spinner,
-  Table,
+  Switch,
+  Tooltip,
   Text,
   TextArea,
   TextField,
-  Switch,
 } from '@radix-ui/themes';
 
 import { formatDate } from '../util/formatDate';
@@ -19,14 +23,15 @@ import { DotsHorizontalIcon } from '@radix-ui/react-icons';
 import { useRolesContext } from '@src/hooks/useRoles';
 import type { Role } from '@server/models';
 import { useRef, useCallback, useState } from 'react';
+import { getInitials } from '@src/util/getInitials';
 
-interface RoleRowProps {
+interface GridCardProps {
   role: Role;
   isEditing: boolean;
   onEditRole: (role: Role) => void;
 }
 
-function RoleRow({ role, isEditing, onEditRole }: RoleRowProps) {
+function GridCard({ role, isEditing, onEditRole }: GridCardProps) {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownTriggerRef = useRef<HTMLButtonElement>(null);
 
@@ -40,66 +45,72 @@ function RoleRow({ role, isEditing, onEditRole }: RoleRowProps) {
   }, [role, onEditRole]);
 
   return (
-    <Table.Row
-      key={role.id}
-      align="center"
-      style={{
-        opacity: isEditing ? 0.5 : 1,
-        pointerEvents: isEditing ? 'none' : 'auto',
-      }}
-    >
-      <Table.RowHeaderCell>
-        <Flex align="center" gap="2">
-          <Text size="2">{role.name}</Text>
-          {role.isDefault && <Badge color="blue">Default</Badge>}
+    <Card key={role.id} size="3">
+      <Flex gap="4" direction="column">
+        <Flex gap="2" width="100%" justify="between">
+          <Flex gap="4" align="center">
+            <Avatar size="3" radius="full" fallback={getInitials(role.name)} />
+            <Flex direction="column" gap="1">
+              <Text size="2" weight="bold">
+                {role.name}
+              </Text>
+              <Tooltip content="If time allowed: Color cordinate these between users/roles">
+                {role.isDefault && <Badge color="iris">Default</Badge>}
+              </Tooltip>
+            </Flex>
+          </Flex>
+          <Box style={{ alignSelf: 'center' }}>
+            <DropdownMenu.Root open={dropdownOpen} onOpenChange={handleDropdownOpenChange}>
+              <DropdownMenu.Trigger>
+                <Button
+                  variant="ghost"
+                  size="3"
+                  color="gray"
+                  radius="full"
+                  disabled={isEditing}
+                  style={{
+                    cursor: isEditing ? 'not-allowed' : 'pointer',
+                    padding: 8,
+                    marginRight: 1,
+                  }}
+                  ref={dropdownTriggerRef}
+                  align-self="end"
+                >
+                  {isEditing ? <Spinner size="1" /> : <DotsHorizontalIcon height="16" width="16" />}
+                </Button>
+              </DropdownMenu.Trigger>
+              <DropdownMenu.Content
+                alignOffset={-80}
+                onCloseAutoFocus={event => {
+                  if (dropdownTriggerRef.current) {
+                    dropdownTriggerRef.current.focus();
+                    event.preventDefault();
+                  }
+                }}
+              >
+                <DropdownMenu.Item style={{ cursor: 'pointer' }} onSelect={handleEditClick}>
+                  Edit Role
+                </DropdownMenu.Item>
+                <DropdownMenu.Item style={{ cursor: 'pointer' }}>Delete role</DropdownMenu.Item>
+              </DropdownMenu.Content>
+            </DropdownMenu.Root>
+          </Box>
         </Flex>
-      </Table.RowHeaderCell>
-      <Table.Cell>
-        <Text size="2">{role.description}</Text>
-      </Table.Cell>
-      <Table.Cell>
-        {formatDate(role.updatedAt, {
-          year: 'numeric',
-          month: 'long',
-          day: '2-digit',
-        })}
-      </Table.Cell>
-      <Table.Cell>
-        <DropdownMenu.Root open={dropdownOpen} onOpenChange={handleDropdownOpenChange}>
-          <DropdownMenu.Trigger>
-            <Button
-              variant="ghost"
-              size="3"
-              color="gray"
-              radius="full"
-              disabled={isEditing}
-              style={{
-                paddingLeft: 6,
-                paddingRight: 6,
-                cursor: isEditing ? 'not-allowed' : 'pointer',
-              }}
-              ref={dropdownTriggerRef}
-            >
-              {isEditing ? <Spinner size="1" /> : <DotsHorizontalIcon height="16" width="16" />}
-            </Button>
-          </DropdownMenu.Trigger>
-          <DropdownMenu.Content
-            alignOffset={-80}
-            onCloseAutoFocus={event => {
-              if (dropdownTriggerRef.current) {
-                dropdownTriggerRef.current.focus();
-                event.preventDefault();
-              }
-            }}
-          >
-            <DropdownMenu.Item style={{ cursor: 'pointer' }} onSelect={handleEditClick}>
-              Edit Role
-            </DropdownMenu.Item>
-            <DropdownMenu.Item style={{ cursor: 'pointer' }}>Delete role</DropdownMenu.Item>
-          </DropdownMenu.Content>
-        </DropdownMenu.Root>
-      </Table.Cell>
-    </Table.Row>
+        <Flex gap="3" align="start" direction="column">
+          <Text as="div" size="2">
+            {role.description}
+          </Text>
+          <Text as="div" size="1" color="gray">
+            Date updated:{' '}
+            {formatDate(role.updatedAt, {
+              year: 'numeric',
+              month: 'long',
+              day: '2-digit',
+            })}
+          </Text>
+        </Flex>
+      </Flex>
+    </Card>
   );
 }
 
@@ -196,27 +207,16 @@ export function RolesTab() {
           isSearching: searchLoading,
         }}
       >
-        <Table.Root variant="surface">
-          <Table.Header>
-            <Table.Row>
-              <Table.ColumnHeaderCell>Role</Table.ColumnHeaderCell>
-              <Table.ColumnHeaderCell>Description</Table.ColumnHeaderCell>
-              <Table.ColumnHeaderCell>Updated</Table.ColumnHeaderCell>
-              <Table.ColumnHeaderCell></Table.ColumnHeaderCell>
-            </Table.Row>
-          </Table.Header>
-
-          <Table.Body>
-            {roles.map(role => (
-              <RoleRow
-                key={role.id}
-                role={role}
-                isEditing={isRoleEditing(role.id)}
-                onEditRole={openEditDialog}
-              />
-            ))}
-          </Table.Body>
-        </Table.Root>
+        <Grid columns="3" gap="4" rows="repeat(2)" width="auto">
+          {roles.map(role => (
+            <GridCard
+              key={role.id}
+              role={role}
+              isEditing={isRoleEditing(role.id)}
+              onEditRole={openEditDialog}
+            />
+          ))}
+        </Grid>
       </DataUI>
 
       <Dialog.Root open={dialogOpen} onOpenChange={handleDialogOpenChange}>
