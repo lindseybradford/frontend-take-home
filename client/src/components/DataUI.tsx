@@ -16,7 +16,7 @@ interface SearchConfig {
   isSearching?: boolean;
 }
 
-interface TableUIProps<T = unknown> {
+interface DataUIProps<T = unknown> {
   children: React.ReactNode;
   loading: boolean;
   error: string | null;
@@ -32,7 +32,7 @@ interface TableUIProps<T = unknown> {
   deletingItemId?: string | null;
 }
 
-export function TableUI<T = unknown>({
+export function DataUI<T = unknown>({
   children,
   loading,
   error,
@@ -46,7 +46,7 @@ export function TableUI<T = unknown>({
   searchLoading = false,
   deleteLoading = false,
   deletingItemId = null,
-}: TableUIProps<T>) {
+}: DataUIProps<T>) {
   const loadingText = useSillyLoadingText();
   const hasSearchQuery = searchConfig?.searchValue && searchConfig.searchValue.length > 0;
   const hasDeleteAction = deleteLoading && deletingItemId;

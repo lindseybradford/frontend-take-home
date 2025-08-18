@@ -33,7 +33,7 @@ src/
 ├── components/
 │   ├── RolesTab.tsx          # Role management with edit functionality
 │   ├── SearchField.tsx       # Reusable search with debouncing
-│   ├── TableUI.tsx           # Generic table wrapper component
+│   ├── DataUI.tsx           # Generic table wrapper component
 │   ├── Toast.tsx             # Toast notification provider
 │   └── UsersTab.tsx          # User management with delete functionality
 ├── contexts/

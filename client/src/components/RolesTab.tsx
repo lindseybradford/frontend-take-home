@@ -1,4 +1,4 @@
-import { TableUI } from './TableUI';
+import { DataUI } from './DataUI';
 import {
   Badge,
   Button,
@@ -175,7 +175,7 @@ export function RolesTab() {
 
   return (
     <>
-      <TableUI
+      <DataUI
         loading={loading}
         error={error}
         onRetry={refreshRoles}
@@ -217,7 +217,7 @@ export function RolesTab() {
             ))}
           </Table.Body>
         </Table.Root>
-      </TableUI>
+      </DataUI>
 
       <Dialog.Root open={dialogOpen} onOpenChange={handleDialogOpenChange}>
         <Portal>

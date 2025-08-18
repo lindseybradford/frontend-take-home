@@ -1,4 +1,4 @@
-import { TableUI } from './TableUI';
+import { DataUI } from './DataUI';
 import {
   AlertDialog,
   Avatar,
@@ -199,7 +199,7 @@ export function UsersTab() {
   );
 
   return (
-    <TableUI
+    <DataUI
       loading={loading}
       error={error}
       onRetry={refreshUsers}
@@ -243,6 +243,6 @@ export function UsersTab() {
           ))}
         </Table.Body>
       </Table.Root>
-    </TableUI>
+    </DataUI>
   );
 }
