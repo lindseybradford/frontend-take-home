@@ -11,6 +11,7 @@ import type {
 import { RolesContext } from './RolesContextDef';
 import { UsersContext } from './UsersContextDef';
 import { ToastContext } from './ToastContextDef';
+import { getAllCachedRoles } from '@src/api/cache'
 
 export function AppProvider({ children }: { children: React.ReactNode }) {
   const [roles, setRoles] = useState<Role[]>([]);
@@ -44,7 +45,11 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const toastTimerRef = useRef<number | null>(null);
 
   const rolesMap = useMemo(() => {
-    return new Map(roles.map(role => [role.id, role]));
+    const allCachedRoles = getAllCachedRoles();
+
+    const rolesToMap = allCachedRoles.length > 0 ? allCachedRoles : roles;
+
+    return new Map(rolesToMap.map(role => [role.id, role]));
   }, [roles]);
 
   const joinUsersWithRoles = useCallback(

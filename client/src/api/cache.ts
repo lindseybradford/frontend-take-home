@@ -1,3 +1,5 @@
+import type { PagedData, Role } from '@server/models';
+
 const cache = new Map<string, { data: unknown; timestamp: number }>();
 const CACHE_TTL = 5 * 60 * 1000;
 
@@ -35,4 +37,10 @@ export function getCacheInfo(): { size: number; keys: string[] } {
     size: cache.size,
     keys: Array.from(cache.keys()),
   };
+}
+
+export function getAllCachedRoles(): Role[] {
+  const allRolesKey = 'roles_{"search":"","page":1}';
+  const cached = getFromCache<PagedData<Role>>(allRolesKey);
+  return cached?.data || [];
 }
